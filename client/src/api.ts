@@ -20,7 +20,7 @@ export const createCard = async (card: { title: string }) => {
   return await response.json();
 };
 
-export const updateCard = async (card: { id: string; title?: string; column?: string; description?: string }) => {
+export const updateCard = async (card: { id: string; title?: string; column?: number; description?: string }) => {
   const response = await fetch(`${API_BASE}/api/ScrumBoard/Update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

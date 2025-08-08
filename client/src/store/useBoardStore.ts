@@ -60,7 +60,16 @@ export const useBoardStore = create<BoardState>((set) => ({
   },
 
   moveCard: async (cardId, fromListId, toListId) => {
-    await updateCard({ id: cardId, column: toListId });
+    const listIdToColumn = (id: string) => {
+      switch (id) {
+        case 'backlog': return 0;
+        case 'todo': return 1;
+        case 'inprogress': return 2;
+        case 'done': return 3;
+        default: return 0;
+      }
+    };
+    await updateCard({ id: cardId, column: listIdToColumn(toListId) });
     set((state) => {
       const fromList = state.lists.find((l) => l.id === fromListId);
       const toList = state.lists.find((l) => l.id === toListId);

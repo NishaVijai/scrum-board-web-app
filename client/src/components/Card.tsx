@@ -24,14 +24,27 @@ function CardComponent({ card, listId, onDelete }: Props, ref: React.Ref<HTMLLIE
     }),
   });
 
+  const listIdToColumn = (id: string) => {
+    switch (id) {
+      case 'backlog': return 0;
+      case 'todo': return 1;
+      case 'inprogress': return 2;
+      case 'done': return 3;
+      default: return 0;
+    }
+  };
+
   const handleSave = async (newDesc: string) => {
     setDesc(newDesc);
     setModalOpen(false);
-    // Update backend with new description
     try {
-      await updateCard({ id: card.id, description: newDesc });
+      await updateCard({
+        id: card.id,
+        title: card.title,
+        column: listIdToColumn(listId),
+        description: newDesc
+      });
     } catch (err) {
-      // Optionally handle error (show toast, etc.)
       console.error('Failed to update card description', err);
     }
   };
