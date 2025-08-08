@@ -1,14 +1,13 @@
 # Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Copy csproj and restore
-COPY ScrumBoardBackend/ScrumBoardBackend.csproj ./ScrumBoardBackend/
-RUN dotnet restore ./ScrumBoardBackend/ScrumBoardBackend.csproj
+# Copy the .csproj file and restore dependencies
+COPY ScrumBoardBackend.csproj ./
+RUN dotnet restore
 
-# Copy the rest and publish
-COPY ScrumBoardBackend/ ./ScrumBoardBackend/
-WORKDIR /src/ScrumBoardBackend
+# Copy all remaining files and build
+COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
 # Stage 2: Runtime
