@@ -8,7 +8,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp", policy =>
     {
         policy.WithOrigins("http://localhost:5173",
-                            "https://scrum-board-web-app.netlify.app")
+                            "https://scrum-board-web-app.netlify.app",
+                            "https://scrum-board-web-app.onrender.com", 
+                            "https://scrum-board-backend-api.onrender.com/")
         .AllowAnyHeader()
         .AllowAnyMethod();
     });
