@@ -2,43 +2,44 @@ using Scrum_Board_Backend.Data;
 using Scrum_Board_Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-//Configure CORS
+
+// ✅ Configure Services
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// ✅ Register DbContext & Services
+builder.Services.AddDbContext<ScrumBoardContext>();
+builder.Services.AddTransient<IScrumBoardContext, ScrumBoardContext>();
+builder.Services.AddTransient<IScrumBoardService, ScrumBoardService>();
+
+// ✅ Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173",
-                            "https://scrum-board-web-app.netlify.app",
-                            "https://scrum-board-web-app.onrender.com", 
-                            "https://scrum-board-backend-api.onrender.com/")
-        .AllowAnyHeader()
-        .AllowAnyMethod();
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "https://scrum-board-web-app.netlify.app",
+                "https://scrum-board-web-app.onrender.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<ScrumBoardContext>();
-using (var context = new ScrumBoardContext())
-{
-    context.Database.EnsureCreated();
-}
-
-//Register services
-var services = builder.Services;
-
-services.AddTransient<IScrumBoardContext, ScrumBoardContext>();
-services.AddTransient<IScrumBoardService, ScrumBoardService>();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ✅ Apply CORS Policy
+app.UseCors("AllowReactApp");
+
+// ✅ Ensure DB is created (best inside a scope)
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ScrumBoardContext>();
+    dbContext.Database.EnsureCreated();
+}
+
+// ✅ Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
