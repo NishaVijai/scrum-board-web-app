@@ -10,8 +10,9 @@ export const Board = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="board-lists">
-        {lists.map((list: ListType, index: number) => (
-          <List key={list.id} list={list} index={index} />
+        {lists.map((list: ListType) => (
+          <List key={list.id} list={list} />
+          // <List key={list.id} list={list} index={index} />
         ))}
       </div>
     </DndProvider>
