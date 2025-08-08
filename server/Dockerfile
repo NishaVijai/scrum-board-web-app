@@ -1,20 +1,23 @@
-# Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+USER app
 WORKDIR /app
+EXPOSE 80
+ENV ASPNETCORE_URLS=http://+:80
 
-# Optional: disable IPv6 (if needed)
-ENV DOTNET_SYSTEM_NET_DISABLEIPV6=1
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["ScrumBoardBackend.csproj", "."]
+RUN dotnet restore "./ScrumBoardBackend.csproj"
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "./ScrumBoardBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Copy project file & restore
-COPY ScrumBoardBackend.csproj ./
-RUN dotnet restore --disable-parallel -v diag
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./ScrumBoardBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Copy rest and publish
-COPY . ./
-RUN dotnet publish -c Release -o /app/publish
-
-# Stage 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ScrumBoardBackend.dll"]
