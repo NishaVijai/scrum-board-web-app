@@ -38,6 +38,7 @@ export const useBoardStore = create<BoardState>((set) => ({
   // Fetch tasks from backend and populate Backlog column
   fetchAndSetTasks: async () => {
     const tasks = await fetchTasks();
+    console.log('Fetched tasks from DB:', tasks);
     set((state) => {
       const lists = state.lists.map((list) => {
         if (list.id === 'backlog') {

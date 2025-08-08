@@ -176,11 +176,6 @@ a:hover {
   cursor: pointer;
 }
 
-.card-title {
-  color: red;
-  font-weight: bold;
-}
-
 .card-item {
   display: flex;
   align-items: center;
