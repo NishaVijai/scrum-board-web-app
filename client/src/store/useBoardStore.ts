@@ -1,10 +1,12 @@
 import { create } from 'zustand';
-import { type Card, type List } from '../types';
+import { type List } from '../types';
+// import { type Card, type List } from '../types';
+import { createCard } from '../api';
 
 interface BoardState {
   lists: List[];
   moveCard: (cardId: string, fromListId: string, toListId: string) => void;
-  addCard: (listId: string, title: string) => void;
+  addCard: (listId: string, title: string) => Promise<void>;
   removeCard: (listId: string, cardId: string) => void;
   moveList: (fromIndex: number, toIndex: number) => void;
 }
@@ -47,14 +49,17 @@ export const useBoardStore = create<BoardState>((set) => ({
       return { lists: [...state.lists] };
     }),
 
-  addCard: (listId, title) =>
+  addCard: async (listId, title) => {
+    const created = await createCard({ title });
     set((state) => {
       const list = state.lists.find((l) => l.id === listId);
       if (!list) return state;
-      const newCard: Card = { id: Date.now().toString(), title };
-      list.cards.push(newCard);
+      // Use the card returned from backend (handle both Id and id)
+      const cardId = created.id ?? created.Id ?? Date.now().toString();
+      list.cards.push({ id: cardId.toString(), title: created.title });
       return { lists: [...state.lists] };
-    }),
+    });
+  },
 
   removeCard: (listId, cardId) =>
     set((state) => {
