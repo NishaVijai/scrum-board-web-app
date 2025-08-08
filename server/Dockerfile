@@ -2,11 +2,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
 
-# Copy the .csproj file and restore dependencies
-COPY ScrumBoardBackend.csproj ./
-RUN dotnet restore
+# Optional: disable IPv6 (if needed)
+ENV DOTNET_SYSTEM_NET_DISABLEIPV6=1
 
-# Copy all remaining files and build
+# Copy project file & restore
+COPY ScrumBoardBackend.csproj ./
+RUN dotnet restore --disable-parallel -v diag
+
+# Copy rest and publish
 COPY . ./
 RUN dotnet publish -c Release -o /app/publish
 
