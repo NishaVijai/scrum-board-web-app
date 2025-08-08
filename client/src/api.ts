@@ -20,14 +20,15 @@ export const createCard = async (card: { title: string }) => {
   return await response.json();
 };
 
-export const updateCard = async (card: { id: string; title?: string; column?: string }) => {
+export const updateCard = async (card: { id: string; title?: string; column?: string; description?: string }) => {
   const response = await fetch(`${API_BASE}/api/ScrumBoard/Update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       Id: card.id,
       Title: card.title,
-      Column: card.column
+      Column: card.column,
+      Description: card.description
     }),
   });
   if (!response.ok) {

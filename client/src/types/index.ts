@@ -1,6 +1,7 @@
 export type Card = {
-  id: string
-  title: string
+  id: string;
+  title: string;
+  description?: string;
 }
 
 export type List = {

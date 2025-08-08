@@ -1,6 +1,8 @@
-import { forwardRef } from 'react';
+import React, { useState } from 'react';
+import { updateCard } from '../api';
 import { useDrag } from 'react-dnd';
 import { ItemTypes, type Card as CardType } from '../types';
+import { CardModal } from './CardModal';
 
 type Props = {
   card: CardType;
@@ -8,9 +10,11 @@ type Props = {
   onDelete?: () => void;
 };
 
-export const Card = forwardRef<HTMLLIElement, Props>(({ card, listId, onDelete }, ref) => {
+function CardComponent({ card, listId, onDelete }: Props, ref: React.Ref<HTMLLIElement>) {
   // Debug log to check card prop
   console.log('Card component received card:', card);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [desc, setDesc] = useState(card.description || '');
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
@@ -20,32 +24,55 @@ export const Card = forwardRef<HTMLLIElement, Props>(({ card, listId, onDelete }
     }),
   });
 
-  return (
-    <li
-      ref={(node) => {
-        drag(node);
-        if (typeof ref === 'function') ref(node);
-        if (ref && 'current' in ref) ref.current = node;
-      }}
-      className="card-item"
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-        cursor: 'move',
-      }}
-    >
-      <span>{card.title}</span>
-      {onDelete && (
-        <button
-          type="button"
-          className="card-delete-btn"
-          onClick={onDelete}
-          aria-label={`Delete card ${card.title}`}
-        >
-          ✕
-        </button>
-      )}
-    </li>
-  );
-});
+  const handleSave = async (newDesc: string) => {
+    setDesc(newDesc);
+    setModalOpen(false);
+    // Update backend with new description
+    try {
+      await updateCard({ id: card.id, description: newDesc });
+    } catch (err) {
+      // Optionally handle error (show toast, etc.)
+      console.error('Failed to update card description', err);
+    }
+  };
 
+  return (
+    <>
+      <li
+        ref={(node) => {
+          drag(node);
+          if (typeof ref === 'function') ref(node);
+          else if (ref && typeof ref === 'object' && ref !== null) (ref as React.MutableRefObject<HTMLLIElement | null>).current = node;
+        }}
+        className="card-item"
+        style={{
+          opacity: isDragging ? 0.5 : 1,
+          cursor: 'move',
+        }}
+        onClick={() => setModalOpen(true)}
+      >
+        <span>{card.title}</span>
+        {onDelete && (
+          <button
+            type="button"
+            className="card-delete-btn"
+            onClick={(e) => { e.stopPropagation(); if (onDelete) onDelete(); }}
+            aria-label={`Delete card ${card.title}`}
+          >
+            ✕
+          </button>
+        )}
+      </li>
+      <CardModal
+        isOpen={modalOpen}
+        title={card.title}
+        description={desc}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+      />
+    </>
+  );
+}
+
+export const Card = React.forwardRef<HTMLLIElement, Props>(CardComponent);
 Card.displayName = 'Card';
