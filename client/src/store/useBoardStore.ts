@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { type List } from '../types';
-import { createCard, updateCard, deleteCard } from '../api';
+import { createCard, updateCard, deleteCard, fetchTasks } from '../api';
 // import { createCard, updateCard, deleteCard, updateListOrder } from '../api';
 
 interface BoardState {
@@ -8,15 +8,21 @@ interface BoardState {
   moveCard: (cardId: string, fromListId: string, toListId: string) => Promise<void>;
   addCard: (listId: string, title: string) => Promise<void>;
   removeCard: (listId: string, cardId: string) => Promise<void>;
+  fetchAndSetTasks: () => Promise<void>;
   // moveList: (fromIndex: number, toIndex: number) => Promise<void>;
 }
 
 export const useBoardStore = create<BoardState>((set) => ({
   lists: [
     {
+      id: 'backlog',
+      title: 'Backlog',
+      cards: [],
+    },
+    {
       id: 'todo',
       title: 'To Do',
-      cards: [{ id: '1', title: 'First Task' }],
+      cards: [],
     },
     {
       id: 'inprogress',
@@ -29,6 +35,28 @@ export const useBoardStore = create<BoardState>((set) => ({
       cards: [],
     },
   ],
+  // Fetch tasks from backend and populate Backlog column
+  fetchAndSetTasks: async () => {
+    const tasks = await fetchTasks();
+    set((state) => {
+      const lists = state.lists.map((list) => {
+        if (list.id === 'backlog') {
+          // Map backend tasks to CardType
+          return {
+            ...list,
+            cards: Array.isArray(tasks)
+              ? tasks.map((task) => ({
+                id: (task.id ?? task.Id ?? '').toString(),
+                title: task.title ?? task.Title ?? '',
+              }))
+              : [],
+          };
+        }
+        return list;
+      });
+      return { lists };
+    });
+  },
 
   moveCard: async (cardId, fromListId, toListId) => {
     await updateCard({ id: cardId, column: toListId });

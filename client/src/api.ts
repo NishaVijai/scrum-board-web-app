@@ -1,9 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_URL || '';
+// Fetch all tasks for Backlog column (or all tasks)
 export const fetchTasks = async () => {
   const response = await fetch(`${API_BASE}/api/ScrumBoard`);
   if (!response.ok) {
     throw new Error("API call failed");
   }
+  // Optionally filter for Backlog if needed, or return all
   return await response.json();
 };
 

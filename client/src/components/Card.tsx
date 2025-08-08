@@ -9,6 +9,8 @@ type Props = {
 };
 
 export const Card = forwardRef<HTMLLIElement, Props>(({ card, listId, onDelete }, ref) => {
+  // Debug log to check card prop
+  console.log('Card component received card:', card);
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
     item: { id: card.id, listId },
@@ -30,7 +32,7 @@ export const Card = forwardRef<HTMLLIElement, Props>(({ card, listId, onDelete }
         cursor: 'move',
       }}
     >
-      <span>{card.title}</span>
+      <span className='card-title'>{card.title}</span>
       {onDelete && (
         <button
           type="button"

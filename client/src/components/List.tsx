@@ -4,15 +4,15 @@ import { useBoardStore } from '../store/useBoardStore';
 import { ItemTypes, type Card as CardType, type List as ListType } from '../types';
 import { Card } from './Card';
 
-type Props = {
+interface Props {
   list: ListType;
-  index: number;
-};
+}
 
 export const List = ({ list }: Props) => {
   const addCard = useBoardStore((s) => s.addCard);
   const removeCard = useBoardStore((s) => s.removeCard);
   const moveCard = useBoardStore((s) => s.moveCard);
+  const fetchAndSetTasks = useBoardStore((s) => s.fetchAndSetTasks);
   const [newTitle, setNewTitle] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -53,6 +53,14 @@ export const List = ({ list }: Props) => {
       inputRef.current.focus();
     }
   }, [isAdding]);
+
+  // Fetch tasks from backend on mount for Backlog column only
+  useEffect(() => {
+    if (list.id === 'backlog' && fetchAndSetTasks) {
+      fetchAndSetTasks();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.id, fetchAndSetTasks]);
 
   return (
     <div
